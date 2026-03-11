@@ -15,7 +15,6 @@ export class PrismaService
   private readonly pool: Pool;
 
   constructor(private readonly configService: ConfigService) {
-    
     const connectionString = configService.get<string>('DATABASE_URL');
 
     if (!connectionString) {
