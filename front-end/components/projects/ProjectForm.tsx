@@ -55,7 +55,7 @@ export default function ProjectForm({
             value={form.color}
             onChange={onChange}
             type="color"
-            className="h-[50px] w-full cursor-pointer rounded-xl border border-gray-300 bg-gray-50 px-2 py-2"
+            className="h-12.5 w-full cursor-pointer rounded-xl border border-gray-300 bg-gray-50 px-2 py-2"
           />
         </div>
 

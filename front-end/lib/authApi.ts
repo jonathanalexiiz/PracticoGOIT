@@ -4,7 +4,6 @@ import {
   getJsonHeaders,
   parseResponse,
 } from '@/lib/clientApi';
-import { guardarAccessToken } from '@/lib/authStorage';
 
 const API_URL = `${BASE_URL}/auth`;
 
