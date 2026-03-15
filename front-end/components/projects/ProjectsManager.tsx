@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   createProject,
   deleteProject,
@@ -8,33 +8,14 @@ import {
   updateProject,
   type Proyecto,
 } from '@/lib/projectsApi';
+import type {
+  ProjectFormData,
+  ProjectsManagerProps,
+} from '@/types/projects';
 import ProjectForm from './ProjectForm';
 import ProjectsList from './ProjectsList';
 
-type FormData = {
-  name: string;
-  description: string;
-  color: string;
-};
-
-type ProjectsManagerProps = {
-  tituloFormularioNuevo: string;
-  tituloFormularioEditar: string;
-  subtituloFormulario: string;
-  tituloListado: string;
-  subtituloListado: string;
-  textoCargando: string;
-  textoVacio: string;
-  textoCrear: string;
-  textoActualizar: string;
-  textoGuardando: string;
-  textoCancelar: string;
-  textoEliminar: string;
-  textoEditar: string;
-  textoConfirmacionEliminar: string;
-};
-
-const initialForm: FormData = {
+const initialForm: ProjectFormData = {
   name: '',
   description: '',
   color: '#6366f1',
@@ -55,39 +36,43 @@ export default function ProjectsManager({
   textoEliminar,
   textoEditar,
   textoConfirmacionEliminar,
+  textoErrorCargar,
+  textoErrorGuardar,
+  textoErrorEliminar,
+  textoErrorNombreObligatorio,
 }: ProjectsManagerProps) {
   const [projects, setProjects] = useState<Proyecto[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const [form, setForm] = useState<FormData>(initialForm);
+  const [form, setForm] = useState<ProjectFormData>(initialForm);
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const tituloFormulario = useMemo(() => {
     return editingId ? tituloFormularioEditar : tituloFormularioNuevo;
   }, [editingId, tituloFormularioEditar, tituloFormularioNuevo]);
 
-  const cargarProyectos = async () => {
+  const cargarProyectos = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
+
       const data = await getProjects();
       setProjects(data);
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Error al cargar proyectos');
+        setError(textoErrorCargar);
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [textoErrorCargar]);
 
   useEffect(() => {
     cargarProyectos();
-  }, []);
+  }, [cargarProyectos]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -103,13 +88,14 @@ export default function ProjectsManager({
   const resetForm = () => {
     setForm(initialForm);
     setEditingId(null);
+    setError(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!form.name.trim()) {
-      setError('El nombre del proyecto es obligatorio');
+      setError(textoErrorNombreObligatorio);
       return;
     }
 
@@ -137,7 +123,7 @@ export default function ProjectsManager({
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Error al guardar proyecto');
+        setError(textoErrorGuardar);
       }
     } finally {
       setSaving(false);
@@ -145,6 +131,7 @@ export default function ProjectsManager({
   };
 
   const handleEdit = (project: Proyecto) => {
+    setError(null);
     setEditingId(project.id);
     setForm({
       name: project.name,
@@ -172,7 +159,7 @@ export default function ProjectsManager({
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Error al eliminar proyecto');
+        setError(textoErrorEliminar);
       }
     }
   };

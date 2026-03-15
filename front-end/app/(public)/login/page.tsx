@@ -5,6 +5,7 @@ export default function LoginPage() {
     <LoginForm
       titulo="Iniciar sesión"
       textoBoton="Iniciar sesión"
+      textoBotonCargando="Ingresando..."
       textoFooter="¿No tienes cuenta?"
       textoLink="Regístrate aquí"
       hrefLink="/register"

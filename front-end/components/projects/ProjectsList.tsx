@@ -1,20 +1,7 @@
 'use client';
 
-import type { Proyecto } from '@/lib/projectsApi';
+import type { ProjectsListProps } from '@/types/projects';
 import ProjectCard from './ProjectCard';
-
-type ProjectsListProps = {
-  projects: Proyecto[];
-  loading: boolean;
-  textoCargando: string;
-  textoVacio: string;
-  tituloListado: string;
-  subtituloListado: string;
-  textoEditar: string;
-  textoEliminar: string;
-  onEdit: (project: Proyecto) => void;
-  onDelete: (projectId: string) => void;
-};
 
 export default function ProjectsList({
   projects,

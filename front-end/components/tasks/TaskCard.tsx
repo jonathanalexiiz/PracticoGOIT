@@ -1,13 +1,7 @@
 'use client';
 
-import type { Tarea, TaskPriority, TaskStatus } from '@/lib/tasksApi';
-
-type TaskCardProps = {
-  task: Tarea;
-  onEdit: (task: Tarea) => void;
-  onDelete: (taskId: string) => void;
-  onQuickStatusChange: (taskId: string, newStatus: TaskStatus) => void;
-};
+import type { TaskPriority, TaskStatus } from '@/lib/tasksApi';
+import type { TaskCardProps } from '@/types/tasks';
 
 function getStatusStyles(status: TaskStatus) {
   if (status === 'PENDING') {
@@ -34,19 +28,34 @@ function getPriorityStyles(priority: TaskPriority) {
 }
 
 function formatStatus(status: TaskStatus) {
-  if (status === 'PENDING') return 'Pendiente';
-  if (status === 'IN_PROGRESS') return 'En progreso';
+  if (status === 'PENDING') {
+    return 'Pendiente';
+  }
+
+  if (status === 'IN_PROGRESS') {
+    return 'En progreso';
+  }
+
   return 'Completada';
 }
 
 function formatPriority(priority: TaskPriority) {
-  if (priority === 'HIGH') return 'Alta';
-  if (priority === 'MEDIUM') return 'Media';
+  if (priority === 'HIGH') {
+    return 'Alta';
+  }
+
+  if (priority === 'MEDIUM') {
+    return 'Media';
+  }
+
   return 'Baja';
 }
 
 export default function TaskCard({
   task,
+  textoEditar,
+  textoEliminar,
+  textoCambioRapidoEstado,
   onEdit,
   onDelete,
   onQuickStatusChange,
@@ -87,11 +96,15 @@ export default function TaskCard({
       </div>
 
       <div className="mb-4">
-        <label className="mb-2 block text-sm font-medium text-gray-700">
-          Cambio rápido de estado
+        <label
+          htmlFor={`quick-status-${task.id}`}
+          className="mb-2 block text-sm font-medium text-gray-700"
+        >
+          {textoCambioRapidoEstado}
         </label>
 
         <select
+          id={`quick-status-${task.id}`}
           value={task.status}
           onChange={(e) =>
             onQuickStatusChange(task.id, e.target.value as TaskStatus)
@@ -110,7 +123,7 @@ export default function TaskCard({
           onClick={() => onEdit(task)}
           className="flex-1 rounded-xl bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-black"
         >
-          Editar
+          {textoEditar}
         </button>
 
         <button
@@ -118,7 +131,7 @@ export default function TaskCard({
           onClick={() => onDelete(task.id)}
           className="flex-1 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-600"
         >
-          Eliminar
+          {textoEliminar}
         </button>
       </div>
     </article>

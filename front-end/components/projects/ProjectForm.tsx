@@ -1,30 +1,6 @@
 'use client';
 
-import type React from 'react';
-
-type FormData = {
-  name: string;
-  description: string;
-  color: string;
-};
-
-type ProjectFormProps = {
-  tituloFormulario: string;
-  subtituloFormulario: string;
-  error: string | null;
-  form: FormData;
-  saving: boolean;
-  editingId: string | null;
-  textoCrear: string;
-  textoActualizar: string;
-  textoGuardando: string;
-  textoCancelar: string;
-  onChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onCancel: () => void;
-};
+import type { ProjectFormProps } from '@/types/projects';
 
 export default function ProjectForm({
   tituloFormulario,
@@ -56,8 +32,11 @@ export default function ProjectForm({
 
       <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700">Nombre</label>
+          <label htmlFor="project-name" className="text-sm font-medium text-gray-700">
+            Nombre
+          </label>
           <input
+            id="project-name"
             name="name"
             value={form.name}
             onChange={onChange}
@@ -67,19 +46,28 @@ export default function ProjectForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700">Color</label>
+          <label htmlFor="project-color" className="text-sm font-medium text-gray-700">
+            Color
+          </label>
           <input
+            id="project-color"
             name="color"
             value={form.color}
             onChange={onChange}
             type="color"
-            className="h-12.5 w-full cursor-pointer rounded-xl border border-gray-300 bg-gray-50 px-2 py-2"
+            className="h-[50px] w-full cursor-pointer rounded-xl border border-gray-300 bg-gray-50 px-2 py-2"
           />
         </div>
 
-        <div className="md:col-span-2 flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700">Descripción</label>
+        <div className="flex flex-col gap-2 md:col-span-2">
+          <label
+            htmlFor="project-description"
+            className="text-sm font-medium text-gray-700"
+          >
+            Descripción
+          </label>
           <textarea
+            id="project-description"
             name="description"
             value={form.description}
             onChange={onChange}
@@ -89,7 +77,7 @@ export default function ProjectForm({
           />
         </div>
 
-        <div className="md:col-span-2 flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 md:col-span-2">
           <button
             type="submit"
             disabled={saving}

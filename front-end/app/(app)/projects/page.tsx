@@ -17,6 +17,10 @@ export default function ProjectsPage() {
       textoEliminar="Eliminar"
       textoEditar="Editar"
       textoConfirmacionEliminar="¿Seguro que deseas eliminar este proyecto? También se eliminarán sus tareas."
+      textoErrorCargar="Error al cargar proyectos"
+      textoErrorGuardar="Error al guardar proyecto"
+      textoErrorEliminar="Error al eliminar proyecto"
+      textoErrorNombreObligatorio="El nombre del proyecto es obligatorio"
     />
   );
 }

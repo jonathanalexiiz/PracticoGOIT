@@ -1,7 +1,13 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+import {
+  BASE_URL,
+  getAuthHeaders,
+  parseResponse,
+  parseVoidResponse,
+} from '@/lib/clientApi';
+
 const API_URL = `${BASE_URL}/projects`;
 
-type Proyecto = {
+export type Proyecto = {
   id: string;
   name: string;
   description?: string | null;
@@ -14,20 +20,11 @@ type Proyecto = {
   };
 };
 
-type ProyectoPayload = {
+export type ProyectoPayload = {
   name: string;
   description?: string;
   color: string;
 };
-
-function getAuthHeaders() {
-  const token = localStorage.getItem('access_token');
-
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
-}
 
 export async function getProjects(): Promise<Proyecto[]> {
   const response = await fetch(API_URL, {
@@ -35,13 +32,7 @@ export async function getProjects(): Promise<Proyecto[]> {
     headers: getAuthHeaders(),
   });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Error al obtener proyectos');
-  }
-
-  return data;
+  return parseResponse<Proyecto[]>(response, 'Error al obtener proyectos');
 }
 
 export async function createProject(
@@ -53,13 +44,7 @@ export async function createProject(
     body: JSON.stringify(payload),
   });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Error al crear proyecto');
-  }
-
-  return data;
+  return parseResponse<Proyecto>(response, 'Error al crear proyecto');
 }
 
 export async function updateProject(
@@ -72,13 +57,7 @@ export async function updateProject(
     body: JSON.stringify(payload),
   });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Error al actualizar proyecto');
-  }
-
-  return data;
+  return parseResponse<Proyecto>(response, 'Error al actualizar proyecto');
 }
 
 export async function deleteProject(projectId: string): Promise<void> {
@@ -87,10 +66,5 @@ export async function deleteProject(projectId: string): Promise<void> {
     headers: getAuthHeaders(),
   });
 
-  if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.message || 'Error al eliminar proyecto');
-  }
+  return parseVoidResponse(response, 'Error al eliminar proyecto');
 }
-
-export type { Proyecto, ProyectoPayload };

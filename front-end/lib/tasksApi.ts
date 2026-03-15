@@ -1,8 +1,9 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-if (!BASE_URL) {
-  throw new Error('NEXT_PUBLIC_API_URL no está definida');
-}
+import {
+  BASE_URL,
+  getAuthHeaders,
+  parseResponse,
+  parseVoidResponse,
+} from '@/lib/clientApi';
 
 const API_URL = `${BASE_URL}/tasks`;
 
@@ -33,39 +34,12 @@ export type TareaPayload = {
   projectId: string;
 };
 
-function getAuthHeaders() {
-  const token = localStorage.getItem('access_token');
-
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
-}
-
-function getErrorMessage(data: unknown, defaultMessage: string) {
-  if (
-    data &&
-    typeof data === 'object' &&
-    'message' in data
-  ) {
-    const message = (data as { message: unknown }).message;
-
-    if (Array.isArray(message)) {
-      return message.join(', ');
-    }
-
-    if (typeof message === 'string') {
-      return message;
-    }
-  }
-
-  return defaultMessage;
-}
-
-export async function getTasks(filters?: {
+export type GetTasksFilters = {
   status?: TaskStatus;
   priority?: TaskPriority;
-}): Promise<Tarea[]> {
+};
+
+export async function getTasks(filters?: GetTasksFilters): Promise<Tarea[]> {
   const params = new URLSearchParams();
 
   if (filters?.status) {
@@ -85,13 +59,7 @@ export async function getTasks(filters?: {
     headers: getAuthHeaders(),
   });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(getErrorMessage(data, 'Error al obtener tareas'));
-  }
-
-  return data;
+  return parseResponse<Tarea[]>(response, 'Error al obtener tareas');
 }
 
 export async function createTask(payload: TareaPayload): Promise<Tarea> {
@@ -101,13 +69,7 @@ export async function createTask(payload: TareaPayload): Promise<Tarea> {
     body: JSON.stringify(payload),
   });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(getErrorMessage(data, 'Error al crear tarea'));
-  }
-
-  return data;
+  return parseResponse<Tarea>(response, 'Error al crear tarea');
 }
 
 export async function updateTask(
@@ -120,13 +82,7 @@ export async function updateTask(
     body: JSON.stringify(payload),
   });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(getErrorMessage(data, 'Error al actualizar tarea'));
-  }
-
-  return data;
+  return parseResponse<Tarea>(response, 'Error al actualizar tarea');
 }
 
 export async function quickUpdateTaskStatus(
@@ -139,15 +95,10 @@ export async function quickUpdateTaskStatus(
     body: JSON.stringify({ status }),
   });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(
-      getErrorMessage(data, 'Error al actualizar el estado de la tarea'),
-    );
-  }
-
-  return data;
+  return parseResponse<Tarea>(
+    response,
+    'Error al actualizar el estado de la tarea',
+  );
 }
 
 export async function deleteTask(taskId: string): Promise<void> {
@@ -156,8 +107,5 @@ export async function deleteTask(taskId: string): Promise<void> {
     headers: getAuthHeaders(),
   });
 
-  if (!response.ok) {
-    const data = await response.json();
-    throw new Error(getErrorMessage(data, 'Error al eliminar tarea'));
-  }
+  return parseVoidResponse(response, 'Error al eliminar tarea');
 }

@@ -1,7 +1,11 @@
+import DashboardManager from '@/components/dashboard/DashboardManager';
+
 export default function DashboardPage() {
   return (
-    <div>
-      <h1>Bienvenido a Dashboard Page</h1>
-    </div>
+    <DashboardManager
+      textoCargando="Cargando dashboard..."
+      textoErrorDefault="Error al cargar el dashboard"
+      textoSinDatos="No hay datos disponibles."
+    />
   );
 }

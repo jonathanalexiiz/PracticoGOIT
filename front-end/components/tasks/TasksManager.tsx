@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { getProjects, type Proyecto } from '@/lib/projectsApi';
 import {
   createTask,
   deleteTask,
@@ -11,19 +12,11 @@ import {
   type TaskPriority,
   type TaskStatus,
 } from '@/lib/tasksApi';
-import { getProjects, type Proyecto } from '@/lib/projectsApi';
+import type { TaskFormData, TasksManagerProps } from '@/types/tasks';
 import TaskForm from './TaskForm';
-import TaskList from './TasksList';
+import TasksList from './TasksList';
 
-type FormData = {
-  title: string;
-  description: string;
-  status: TaskStatus;
-  priority: TaskPriority;
-  projectId: string;
-};
-
-const initialForm: FormData = {
+const initialForm: TaskFormData = {
   title: '',
   description: '',
   status: 'PENDING',
@@ -31,27 +24,50 @@ const initialForm: FormData = {
   projectId: '',
 };
 
-export default function TasksManager() {
+export default function TasksManager({
+  tituloFormularioNuevo,
+  tituloFormularioEditar,
+  subtituloFormulario,
+  tituloListado,
+  subtituloListado,
+  textoCargando,
+  textoVacio,
+  textoCrear,
+  textoActualizar,
+  textoGuardando,
+  textoCancelar,
+  textoEditar,
+  textoEliminar,
+  textoCambioRapidoEstado,
+  textoFiltroEstado,
+  textoFiltroPrioridad,
+  textoErrorCargarProyectos,
+  textoErrorCargarTareas,
+  textoErrorGuardar,
+  textoErrorEliminar,
+  textoErrorActualizarEstado,
+  textoErrorTituloObligatorio,
+  textoErrorProyectoObligatorio,
+  textoConfirmacionEliminar,
+  textoProyectoSinDisponibles,
+  textoSeleccionarProyecto,
+}: TasksManagerProps) {
   const [tasks, setTasks] = useState<Tarea[]>([]);
   const [projects, setProjects] = useState<Proyecto[]>([]);
-
   const [loading, setLoading] = useState(true);
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [saving, setSaving] = useState(false);
-
   const [error, setError] = useState<string | null>(null);
-
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<FormData>(initialForm);
-
-  const [filterStatus, setFilterStatus] = useState<string>('');
-  const [filterPriority, setFilterPriority] = useState<string>('');
+  const [form, setForm] = useState<TaskFormData>(initialForm);
+  const [filterStatus, setFilterStatus] = useState<TaskStatus | ''>('');
+  const [filterPriority, setFilterPriority] = useState<TaskPriority | ''>('');
 
   const tituloFormulario = useMemo(() => {
-    return editingId ? 'Editar tarea' : 'Nueva tarea';
-  }, [editingId]);
+    return editingId ? tituloFormularioEditar : tituloFormularioNuevo;
+  }, [editingId, tituloFormularioEditar, tituloFormularioNuevo]);
 
-  const cargarProyectos = async () => {
+  const cargarProyectos = useCallback(async () => {
     try {
       setLoadingProjects(true);
       setError(null);
@@ -72,21 +88,21 @@ export default function TasksManager() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Error al cargar proyectos');
+        setError(textoErrorCargarProyectos);
       }
     } finally {
       setLoadingProjects(false);
     }
-  };
+  }, [textoErrorCargarProyectos]);
 
-  const cargarTareas = async () => {
+  const cargarTareas = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       const data = await getTasks({
-        status: filterStatus ? (filterStatus as TaskStatus) : undefined,
-        priority: filterPriority ? (filterPriority as TaskPriority) : undefined,
+        status: filterStatus || undefined,
+        priority: filterPriority || undefined,
       });
 
       setTasks(data);
@@ -94,24 +110,16 @@ export default function TasksManager() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Error al cargar tareas');
+        setError(textoErrorCargarTareas);
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterStatus, filterPriority, textoErrorCargarTareas]);
 
   useEffect(() => {
-    const inicializar = async () => {
-      await Promise.all([cargarProyectos(), cargarTareas()]);
-    };
-
-    inicializar();
-  }, []);
-
-  useEffect(() => {
-    cargarTareas();
-  }, [filterStatus, filterPriority]);
+    Promise.all([cargarProyectos(), cargarTareas()]);
+  }, [cargarProyectos, cargarTareas]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -135,16 +143,16 @@ export default function TasksManager() {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!form.title.trim()) {
-      setError('El título de la tarea es obligatorio');
+      setError(textoErrorTituloObligatorio);
       return;
     }
 
     if (!form.projectId) {
-      setError('Debes seleccionar un proyecto');
+      setError(textoErrorProyectoObligatorio);
       return;
     }
 
@@ -176,7 +184,7 @@ export default function TasksManager() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Error al guardar tarea');
+        setError(textoErrorGuardar);
       }
     } finally {
       setSaving(false);
@@ -196,7 +204,7 @@ export default function TasksManager() {
   };
 
   const handleDelete = async (taskId: string) => {
-    const confirmar = window.confirm('¿Seguro que deseas eliminar esta tarea?');
+    const confirmar = window.confirm(textoConfirmacionEliminar);
 
     if (!confirmar) {
       return;
@@ -214,7 +222,7 @@ export default function TasksManager() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Error al eliminar tarea');
+        setError(textoErrorEliminar);
       }
     }
   };
@@ -231,7 +239,7 @@ export default function TasksManager() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Error al actualizar estado');
+        setError(textoErrorActualizarEstado);
       }
     }
   };
@@ -240,22 +248,38 @@ export default function TasksManager() {
     <div className="space-y-8">
       <TaskForm
         tituloFormulario={tituloFormulario}
+        subtituloFormulario={subtituloFormulario}
         error={error}
         form={form}
         projects={projects}
         loadingProjects={loadingProjects}
         saving={saving}
         editingId={editingId}
+        textoCrear={textoCrear}
+        textoActualizar={textoActualizar}
+        textoGuardando={textoGuardando}
+        textoCancelar={textoCancelar}
+        textoProyectoSinDisponibles={textoProyectoSinDisponibles}
+        textoSeleccionarProyecto={textoSeleccionarProyecto}
         onChange={handleChange}
         onSubmit={handleSubmit}
         onCancel={resetForm}
       />
 
-      <TaskList
+      <TasksList
         tasks={tasks}
         loading={loading}
         filterStatus={filterStatus}
         filterPriority={filterPriority}
+        tituloListado={tituloListado}
+        subtituloListado={subtituloListado}
+        textoCargando={textoCargando}
+        textoVacio={textoVacio}
+        textoEditar={textoEditar}
+        textoEliminar={textoEliminar}
+        textoCambioRapidoEstado={textoCambioRapidoEstado}
+        textoFiltroEstado={textoFiltroEstado}
+        textoFiltroPrioridad={textoFiltroPrioridad}
         onFilterStatusChange={setFilterStatus}
         onFilterPriorityChange={setFilterPriority}
         onEdit={handleEdit}

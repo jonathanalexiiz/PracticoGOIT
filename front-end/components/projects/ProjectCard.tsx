@@ -1,14 +1,6 @@
 'use client';
 
-import type { Proyecto } from '@/lib/projectsApi';
-
-type ProjectCardProps = {
-  project: Proyecto;
-  textoEditar: string;
-  textoEliminar: string;
-  onEdit: (project: Proyecto) => void;
-  onDelete: (projectId: string) => void;
-};
+import type { ProjectCardProps } from '@/types/projects';
 
 export default function ProjectCard({
   project,
@@ -19,10 +11,7 @@ export default function ProjectCard({
 }: ProjectCardProps) {
   return (
     <article className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-      <div
-        className="h-3 w-full"
-        style={{ backgroundColor: project.color }}
-      />
+      <div className="h-3 w-full" style={{ backgroundColor: project.color }} />
 
       <div className="p-5">
         <div className="mb-4 flex items-start justify-between gap-3">

@@ -1,42 +1,22 @@
 'use client';
 
-import type React from 'react';
-import type { Proyecto } from '@/lib/projectsApi';
-import type { TaskPriority, TaskStatus } from '@/lib/tasksApi';
-
-type FormData = {
-  title: string;
-  description: string;
-  status: TaskStatus;
-  priority: TaskPriority;
-  projectId: string;
-};
-
-type TaskFormProps = {
-  tituloFormulario: string;
-  error: string | null;
-  form: FormData;
-  projects: Proyecto[];
-  loadingProjects: boolean;
-  saving: boolean;
-  editingId: string | null;
-  onChange: (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onCancel: () => void;
-};
+import type { TaskFormProps } from '@/types/tasks';
 
 export default function TaskForm({
   tituloFormulario,
+  subtituloFormulario,
   error,
   form,
   projects,
   loadingProjects,
   saving,
   editingId,
+  textoCrear,
+  textoActualizar,
+  textoGuardando,
+  textoCancelar,
+  textoProyectoSinDisponibles,
+  textoSeleccionarProyecto,
   onChange,
   onSubmit,
   onCancel,
@@ -45,9 +25,7 @@ export default function TaskForm({
     <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="mb-5">
         <h2 className="text-2xl font-bold text-gray-800">{tituloFormulario}</h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Crea, edita y organiza tus tareas por proyecto.
-        </p>
+        <p className="mt-1 text-sm text-gray-500">{subtituloFormulario}</p>
       </div>
 
       {error && (
@@ -58,8 +36,11 @@ export default function TaskForm({
 
       <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700">Título</label>
+          <label htmlFor="task-title" className="text-sm font-medium text-gray-700">
+            Título
+          </label>
           <input
+            id="task-title"
             name="title"
             value={form.title}
             onChange={onChange}
@@ -69,8 +50,11 @@ export default function TaskForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700">Proyecto</label>
+          <label htmlFor="task-project" className="text-sm font-medium text-gray-700">
+            Proyecto
+          </label>
           <select
+            id="task-project"
             name="projectId"
             value={form.projectId}
             onChange={onChange}
@@ -78,20 +62,29 @@ export default function TaskForm({
             className="rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-gray-800 outline-none transition focus:border-blue-500 focus:bg-white disabled:cursor-not-allowed disabled:opacity-70"
           >
             {projects.length === 0 ? (
-              <option value="">No hay proyectos disponibles</option>
+              <option value="">{textoProyectoSinDisponibles}</option>
             ) : (
-              projects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.name}
-                </option>
-              ))
+              <>
+                <option value="">{textoSeleccionarProyecto}</option>
+                {projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </>
             )}
           </select>
         </div>
 
-        <div className="md:col-span-2 flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700">Descripción</label>
+        <div className="flex flex-col gap-2 md:col-span-2">
+          <label
+            htmlFor="task-description"
+            className="text-sm font-medium text-gray-700"
+          >
+            Descripción
+          </label>
           <textarea
+            id="task-description"
             name="description"
             value={form.description}
             onChange={onChange}
@@ -102,8 +95,11 @@ export default function TaskForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700">Estado</label>
+          <label htmlFor="task-status" className="text-sm font-medium text-gray-700">
+            Estado
+          </label>
           <select
+            id="task-status"
             name="status"
             value={form.status}
             onChange={onChange}
@@ -116,8 +112,11 @@ export default function TaskForm({
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-gray-700">Prioridad</label>
+          <label htmlFor="task-priority" className="text-sm font-medium text-gray-700">
+            Prioridad
+          </label>
           <select
+            id="task-priority"
             name="priority"
             value={form.priority}
             onChange={onChange}
@@ -129,17 +128,17 @@ export default function TaskForm({
           </select>
         </div>
 
-        <div className="md:col-span-2 flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 md:col-span-2">
           <button
             type="submit"
             disabled={saving || loadingProjects || projects.length === 0}
             className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {saving
-              ? 'Guardando...'
+              ? textoGuardando
               : editingId
-                ? 'Actualizar tarea'
-                : 'Crear tarea'}
+                ? textoActualizar
+                : textoCrear}
           </button>
 
           {editingId && (
@@ -148,7 +147,7 @@ export default function TaskForm({
               onClick={onCancel}
               className="rounded-xl bg-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-300"
             >
-              Cancelar edición
+              {textoCancelar}
             </button>
           )}
         </div>

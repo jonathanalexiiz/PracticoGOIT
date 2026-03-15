@@ -1,30 +1,16 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Sidebar from '@/components/layout/SideBar';
 import Footer from '@/components/layout/Footer';
+import useRequireAuth from '@/components/hooks/auth/useRequireAuth';
 
 export default function AppLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
-  const router = useRouter();
-  const [autorizado, setAutorizado] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem('access_token');
-
-    if (!token) {
-      router.replace('/login');
-      return;
-    }
-
-    setAutorizado(true);
-  }, [router]);
+}>) {
+  const { autorizado } = useRequireAuth('/login');
 
   if (!autorizado) {
     return null;
@@ -38,7 +24,7 @@ export default function AppLayout({
         <Sidebar />
 
         <main className="flex-1 p-8">
-          <div className="min-h-125 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="min-h-[500px] rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             {children}
           </div>
         </main>

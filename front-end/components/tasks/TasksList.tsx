@@ -1,26 +1,23 @@
 'use client';
 
-import type { Tarea, TaskStatus } from '@/lib/tasksApi';
+import type { TasksListProps } from '@/types/tasks';
 import TaskCard from './TaskCard';
 import TaskFilters from './TaskFilters';
-
-type TasksListProps = {
-  tasks: Tarea[];
-  loading: boolean;
-  filterStatus: string;
-  filterPriority: string;
-  onFilterStatusChange: (value: string) => void;
-  onFilterPriorityChange: (value: string) => void;
-  onEdit: (task: Tarea) => void;
-  onDelete: (taskId: string) => void;
-  onQuickStatusChange: (taskId: string, newStatus: TaskStatus) => void;
-};
 
 export default function TasksList({
   tasks,
   loading,
   filterStatus,
   filterPriority,
+  tituloListado,
+  subtituloListado,
+  textoCargando,
+  textoVacio,
+  textoEditar,
+  textoEliminar,
+  textoCambioRapidoEstado,
+  textoFiltroEstado,
+  textoFiltroPrioridad,
   onFilterStatusChange,
   onFilterPriorityChange,
   onEdit,
@@ -31,15 +28,15 @@ export default function TasksList({
     <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Mis tareas</h2>
-          <p className="mt-1 text-sm text-gray-500">
-            Filtra y administra tus tareas por estado y prioridad.
-          </p>
+          <h2 className="text-2xl font-bold text-gray-800">{tituloListado}</h2>
+          <p className="mt-1 text-sm text-gray-500">{subtituloListado}</p>
         </div>
 
         <TaskFilters
           filterStatus={filterStatus}
           filterPriority={filterPriority}
+          textoFiltroEstado={textoFiltroEstado}
+          textoFiltroPrioridad={textoFiltroPrioridad}
           onFilterStatusChange={onFilterStatusChange}
           onFilterPriorityChange={onFilterPriorityChange}
         />
@@ -47,11 +44,11 @@ export default function TasksList({
 
       {loading ? (
         <div className="rounded-xl border border-gray-200 bg-gray-50 p-6 text-sm text-gray-500">
-          Cargando tareas...
+          {textoCargando}
         </div>
       ) : tasks.length === 0 ? (
         <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center text-gray-500">
-          No hay tareas para mostrar.
+          {textoVacio}
         </div>
       ) : (
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -59,6 +56,9 @@ export default function TasksList({
             <TaskCard
               key={task.id}
               task={task}
+              textoEditar={textoEditar}
+              textoEliminar={textoEliminar}
+              textoCambioRapidoEstado={textoCambioRapidoEstado}
               onEdit={onEdit}
               onDelete={onDelete}
               onQuickStatusChange={onQuickStatusChange}
